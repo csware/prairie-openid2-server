@@ -47,7 +47,7 @@ class OpenidServer {
 	
 	
 	// constructor
-	function OpenidServer($db, $type=null) {
+	function __construct($db, $type=null) {
 		$this->storage = $db;
 
 		if (isset($type) && $type == "SHA256") {

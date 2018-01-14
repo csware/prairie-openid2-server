@@ -30,7 +30,7 @@ class Template {
 	// the constructor
 	// Tom Calthrop, 26th March 2007
 	//
-	function Template() {
+	function __construct() {
 	
 	} // EO Constructor
 

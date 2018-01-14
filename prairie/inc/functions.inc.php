@@ -153,9 +153,11 @@ function textarea_($name, $content="", $cols=60, $rows=4, $style="" ) {
 function routeURL ($webspace_name=null) {
 	if (isset($_SERVER['ORIG_PATH_INFO'])) {
 		$request_uri = substr($_SERVER['ORIG_PATH_INFO'], 1);
-	} else {
+	} elseif (isset($_SERVER['PATH_INFO'])){
 		$request_uri = substr($_SERVER['PATH_INFO'], 1);
-	}
+	} else {
+		$request_uri = '';
+        }
 	
 	$request_arr = explode('/', $request_uri);
 	

@@ -28,7 +28,7 @@ class Database {
 	// the constructor
 	// Tom Calthrop, 26th March 2007
 	//
-	function Database($db_core_config) {
+	function __construct($db_core_config) {
 		$this->db_config = $db_core_config;
 		$this->prefix = $db_core_config['prefix'];
 	} //EO Database
