@@ -137,9 +137,9 @@ elseif (isset($_POST['perform_installation'])) {
 	$core_config['db']['pass'] = $_POST['database_password'];
 	$core_config['db']['db'] = $_POST['database_db'];
 	
-	$connection = @mysql_connect($core_config['db']['host'], $core_config['db']['user'] ,$core_config['db']['pass']);
+	$connection = @mysqli_connect($core_config['db']['host'], $core_config['db']['user'] ,$core_config['db']['pass']);
 
-	if (!is_resource($connection)) {
+	if (mysqli_connect_errno()) {
 		$GLOBALS['script_error_log'][] = _("The database connection could not be created. Please check your database settings.");
 	}
 	else {
@@ -149,23 +149,23 @@ elseif (isset($_POST['perform_installation'])) {
 		writeToConfig('$core_config[\'db\'][\'pass\']', $core_config['db']['pass']);
 		writeToConfig('$core_config[\'db\'][\'db\']', $core_config['db']['db']);
 		
-		$db_selected = mysql_select_db($core_config['db']['db'], $connection);
+		$db_selected = mysqli_select_db($connection, $core_config['db']['db']);
 		
 		if (!$db_selected) { // we create the database
 
 			$query = "SET NAMES 'utf8'";
 	
-			mysql_query($query, $connection);
+			mysqli_query($connection, $query);
 	
 			$query = "SET CHARACTER SET 'utf8'";
 	
-			mysql_query($query, $connection);
+			mysqli_query($connection, $query);
 			
 			$query = "CREATE DATABASE " . $core_config['db']['db'] . " DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
 			
-			mysql_query($query, $connection);
+			mysqli_query($connection, $query);
 	
-			$db_selected = mysql_select_db($core_config['db']['db'], $connection);
+			$db_selected = mysqli_select_db($connection, $core_config['db']['db']);
 		}
 		
 		if (!$db_selected) {
@@ -183,7 +183,7 @@ elseif (isset($_POST['perform_installation'])) {
 					foreach ($matches[0] as $key => $i):
 						$query = str_replace(';', '', $i);
 						
-						mysql_query($query, $connection);
+						mysql_query($connection, $query);
 					endforeach;
 				}
 			}
@@ -369,13 +369,13 @@ else { // pre-start checks and setup
 	$is_error = 0;
 	
 	// Check for MySQL
-	if (!function_exists('mysql_connect')) {
-		$system_check['result'] = _("Prairie needs MySQL. Please add MySQL support to PHP.");
+	if (!function_exists('mysqli_connect')) {
+		$system_check['result'] = _("Prairie needs MySQLi. Please add MySQLi support to PHP.");
 		$system_check['is_valid'] = 0;
 		$is_error = 1;
 	}
 	else {
-		$system_check['result'] = _("PHP MySQL exists");
+		$system_check['result'] = _("PHP MySQLi exists");
 		$system_check['is_valid'] = 1;
 	}
 	

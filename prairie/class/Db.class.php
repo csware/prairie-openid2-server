@@ -36,23 +36,23 @@ class Database {
 
 	function newConnection() {
 		//we connect to the database
-		$this->connection = @mysql_connect($this->db_config['host'], $this->db_config['user'] , $this->db_config['pass']);
+		$this->connection = @mysqli_connect($this->db_config['host'], $this->db_config['user'] , $this->db_config['pass']);
 
-		if (!is_resource($this->connection)) {
+		if (mysqli_connect_errno()) {
 			$error_message = _("There was a database error of type {1}.");
-			$error_message = str_replace("{1}", mysql_error(), $error_message);
+			$error_message = str_replace("{1}", mysqli_error($this->connection), $error_message);
 			$GLOBALS['script_error_log'][] = $error_message;
 		}
 		else {
 			//we select the database
-			$db_selected = mysql_select_db($this->db_config['db'], $this->connection);
+			$db_selected = mysqli_select_db($this->connection, $this->db_config['db']);
 			if (!$db_selected) {
 				$error_message = _("There was a database select error of type {1}.");
-				$error_message = str_replace("{1}", mysql_error(), $error_message);
+				$error_message = str_replace("{1}", mysqli_error($this->connection), $error_message);
 				$GLOBALS['script_error_log'][] = $error_message;
 			}
 			else {
-				$db->prefix = $this->db_config['prefix'];
+				$this->prefix = $this->db_config['prefix'];
 
 				// set up database collation
 				$query = "SET NAMES 'utf8'";
@@ -81,21 +81,21 @@ class Database {
 			}
 		}
 		
-		$this->resource = mysql_query($query, $this->connection);
+		$this->resource = mysqli_query($this->connection, $query);
 		
 		if (!$this->resource) {
 			$error_message = _("There was a database query error of type {1} on query {2}.");
-			$error_message = str_replace("{1}", mysql_error(), $error_message);
+			$error_message = str_replace("{1}", mysqli_error($this->connection), $error_message);
 			$error_message = str_replace("{2}", $query, $error_message);
 			$GLOBALS['script_error_log'][] = $error_message;
 		}
 		else {
 
-			if (is_resource($this->resource)) { // SELECT, SHOW, DESCRIBE or EXPLAIN
+			if ($this->resource !== true) { // SELECT, SHOW, DESCRIBE or EXPLAIN
 				
-				if (mysql_num_rows($this->resource) > 0) {
+				if (mysqli_num_rows($this->resource) > 0) {
 					$result = array();
-					while($row = mysql_fetch_array($this->resource)) {
+					while($row = mysqli_fetch_array($this->resource)) {
 						$result[] = $row;
 					}
 					//mysql_free_result($resource);
@@ -114,15 +114,18 @@ class Database {
 	function qstr($s) {
 		
 		if (!get_magic_quotes_gpc()) {
- 			$s =  mysql_real_escape_string($s);
+			if (!isset($this->connection) || ! $this->connection) {
+				$this->newConnection();
+			}
+ 			$s = mysqli_real_escape_string($this->connection, $s);
 		}
 		return "'" . $s . "'";
 	}
 
 	function insertID() {
 		if (isset($this->connection)) {
-			if (is_resource($this->connection)) {
-				return mysql_insert_id ($this->connection);
+			if ($this->connection) {
+				return mysqli_insert_id ($this->connection);
 			}
 		}
 		return 0;
